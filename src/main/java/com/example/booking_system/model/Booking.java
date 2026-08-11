@@ -41,6 +41,27 @@ public class Booking {
     public Booking() {
     }
 
+    public static Booking create(
+            Long roomId,
+            Long userId,
+            String title,
+            LocalDateTime startTime,
+            LocalDateTime endTime,
+            BookingStatus status,
+            BigDecimal pricePerHour,
+            BigDecimal amount) {
+        Booking booking = new Booking();
+        booking.setRoomId(roomId);
+        booking.setUserId(userId);
+        booking.setTitle(title);
+        booking.setStartTime(startTime);
+        booking.setEndTime(endTime);
+        booking.setStatus(status);
+        booking.setPricePerHour(pricePerHour);
+        booking.setAmount(amount);
+        return booking;
+    }
+
     public Long getId() {
         return id;
     }

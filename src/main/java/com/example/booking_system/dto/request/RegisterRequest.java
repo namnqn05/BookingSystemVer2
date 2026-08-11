@@ -1,6 +1,5 @@
 package com.example.booking_system.dto.request;
 
-import com.example.booking_system.model.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -18,16 +17,13 @@ public class RegisterRequest {
     @NotBlank(message = "Full name is required")
     private String fullName;
 
-    private Role role;
-
     public RegisterRequest() {
     }
 
-    public RegisterRequest(String email, String password, String fullName, Role role) {
+    public RegisterRequest(String email, String password, String fullName) {
         this.email = email;
         this.password = password;
         this.fullName = fullName;
-        this.role = role;
     }
 
     public String getEmail() {
@@ -52,13 +48,5 @@ public class RegisterRequest {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
     }
 }

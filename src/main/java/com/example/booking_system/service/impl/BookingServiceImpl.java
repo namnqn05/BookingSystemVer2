@@ -13,9 +13,12 @@ import com.example.booking_system.repository.BookingRepository;
 import com.example.booking_system.repository.NotificationRepository;
 import com.example.booking_system.repository.RoomRepository;
 import com.example.booking_system.repository.UserRepository;
+import com.example.booking_system.security.PermissionCodes;
+import com.example.booking_system.security.UserPrincipal;
 import com.example.booking_system.service.BookingService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,7 +50,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<BookingResponse> getAllBookings(String date, Pageable pageable) {
+    public Page<BookingResponse> getBookings(String date, Pageable pageable, UserPrincipal principal) {
+        boolean canViewAll = hasAuthority(principal, PermissionCodes.BOOKING_VIEW_ALL);
+
         if (date != null && !date.trim().isEmpty()) {
             LocalDate localDate;
             try {
@@ -57,10 +62,17 @@ public class BookingServiceImpl implements BookingService {
             }
             LocalDateTime start = localDate.atStartOfDay();
             LocalDateTime end = localDate.plusDays(1).atStartOfDay();
-            return bookingRepository.findByDateRange(start, end, pageable).map(this::toResponse);
+            if (canViewAll) {
+                return bookingRepository.findByDateRange(start, end, pageable).map(this::toResponse);
+            }
+            return bookingRepository.findByUserIdAndDateRange(principal.getId(), start, end, pageable)
+                    .map(this::toResponse);
         }
 
-        return bookingRepository.findAll(pageable).map(this::toResponse);
+        if (canViewAll) {
+            return bookingRepository.findAll(pageable).map(this::toResponse);
+        }
+        return bookingRepository.findByUserId(principal.getId(), pageable).map(this::toResponse);
     }
 
     @Override
@@ -97,32 +109,32 @@ public class BookingServiceImpl implements BookingService {
         BigDecimal amount = pricePerHour.multiply(BigDecimal.valueOf(minutes))
                 .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
 
-        Booking booking = new Booking();
-        booking.setRoomId(request.getRoomId());
-        booking.setUserId(user.getId());
-        booking.setTitle(request.getTitle());
-        booking.setStartTime(request.getStartTime());
-        booking.setEndTime(request.getEndTime());
-        booking.setStatus(initialStatus);
-        booking.setPricePerHour(pricePerHour);
-        booking.setAmount(amount);
+        Booking booking = Booking.create(
+                request.getRoomId(),
+                user.getId(),
+                request.getTitle(),
+                request.getStartTime(),
+                request.getEndTime(),
+                initialStatus,
+                pricePerHour,
+                amount
+        );
 
         Booking saved = bookingRepository.save(booking);
 
         if (user.getRole() != Role.ROLE_ADMIN) {
             java.util.List<User> admins = userRepository.findByRole(Role.ROLE_ADMIN);
             for (User admin : admins) {
-                Notification notification = new Notification();
-                notification.setRecipientUser(admin);
-                notification.setTitle("New Booking Request");
-                notification.setMessage("New booking request '" + saved.getTitle() + "' submitted by " + (user.getFullName() != null ? user.getFullName() : user.getEmail()) + ".");
-                notification.setType(NotificationType.BOOKING_PENDING);
-                notification.setReferenceType("BOOKING");
-                notification.setReferenceId(saved.getId());
-                notification.setRead(false);
-                notification.setCreatedAt(Instant.now());
-                notification.setCreatedBy(user.getId());
-                notificationRepository.save(notification);
+                notificationRepository.save(Notification.create(
+                        admin,
+                        "New Booking Request",
+                        "New booking request '" + saved.getTitle() + "' submitted by "
+                                + (user.getFullName() != null ? user.getFullName() : user.getEmail()) + ".",
+                        NotificationType.BOOKING_PENDING,
+                        "BOOKING",
+                        saved.getId(),
+                        user.getId()
+                ));
             }
         }
 
@@ -141,7 +153,7 @@ public class BookingServiceImpl implements BookingService {
         User actorUser = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        if (!actorUser.getId().equals(booking.getUserId()) && actorUser.getRole() != Role.ROLE_ADMIN) {
+        if (actorUser.getRole() != Role.ROLE_ADMIN) {
             throw new IllegalArgumentException("You are not authorized to approve this booking");
         }
 
@@ -149,17 +161,15 @@ public class BookingServiceImpl implements BookingService {
         Booking updated = bookingRepository.save(booking);
 
         User bookingOwner = userRepository.findById(booking.getUserId()).orElse(actorUser);
-        Notification notification = new Notification();
-        notification.setRecipientUser(bookingOwner);
-        notification.setTitle("Booking Approved");
-        notification.setMessage("Your booking '" + booking.getTitle() + "' has been approved.");
-        notification.setType(NotificationType.BOOKING_APPROVED);
-        notification.setReferenceType("BOOKING");
-        notification.setReferenceId(updated.getId());
-        notification.setRead(false);
-        notification.setCreatedAt(Instant.now());
-        notification.setCreatedBy(actorUser.getId());
-        notificationRepository.save(notification);
+        notificationRepository.save(Notification.create(
+                bookingOwner,
+                "Booking Approved",
+                "Your booking '" + booking.getTitle() + "' has been approved.",
+                NotificationType.BOOKING_APPROVED,
+                "BOOKING",
+                updated.getId(),
+                actorUser.getId()
+        ));
 
         return toResponse(updated);
     }
@@ -172,7 +182,7 @@ public class BookingServiceImpl implements BookingService {
         User actorUser = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        if (!actorUser.getId().equals(booking.getUserId()) && actorUser.getRole() != Role.ROLE_ADMIN) {
+        if (actorUser.getRole() != Role.ROLE_ADMIN) {
             throw new IllegalArgumentException("You are not authorized to reject this booking");
         }
 
@@ -180,17 +190,15 @@ public class BookingServiceImpl implements BookingService {
         Booking updated = bookingRepository.save(booking);
 
         User bookingOwner = userRepository.findById(booking.getUserId()).orElse(actorUser);
-        Notification notification = new Notification();
-        notification.setRecipientUser(bookingOwner);
-        notification.setTitle("Booking Rejected");
-        notification.setMessage("Your booking '" + booking.getTitle() + "' has been rejected.");
-        notification.setType(NotificationType.BOOKING_REJECTED);
-        notification.setReferenceType("BOOKING");
-        notification.setReferenceId(updated.getId());
-        notification.setRead(false);
-        notification.setCreatedAt(Instant.now());
-        notification.setCreatedBy(actorUser.getId());
-        notificationRepository.save(notification);
+        notificationRepository.save(Notification.create(
+                bookingOwner,
+                "Booking Rejected",
+                "Your booking '" + booking.getTitle() + "' has been rejected.",
+                NotificationType.BOOKING_REJECTED,
+                "BOOKING",
+                updated.getId(),
+                actorUser.getId()
+        ));
 
         return toResponse(updated);
     }
@@ -215,17 +223,15 @@ public class BookingServiceImpl implements BookingService {
         Booking updated = bookingRepository.save(booking);
 
         User bookingOwner = userRepository.findById(booking.getUserId()).orElse(actorUser);
-        Notification notification = new Notification();
-        notification.setRecipientUser(bookingOwner);
-        notification.setTitle("Booking Cancelled");
-        notification.setMessage("Your booking '" + booking.getTitle() + "' has been cancelled.");
-        notification.setType(NotificationType.BOOKING_CANCELLED);
-        notification.setReferenceType("BOOKING");
-        notification.setReferenceId(updated.getId());
-        notification.setRead(false);
-        notification.setCreatedAt(Instant.now());
-        notification.setCreatedBy(actorUser.getId());
-        notificationRepository.save(notification);
+        notificationRepository.save(Notification.create(
+                bookingOwner,
+                "Booking Cancelled",
+                "Your booking '" + booking.getTitle() + "' has been cancelled.",
+                NotificationType.BOOKING_CANCELLED,
+                "BOOKING",
+                updated.getId(),
+                actorUser.getId()
+        ));
 
         return toResponse(updated);
     }
@@ -235,5 +241,11 @@ public class BookingServiceImpl implements BookingService {
         User user = userRepository.findById(booking.getUserId()).orElse(null);
 
         return BookingResponse.fromEntity(booking, room, user);
+    }
+
+    private boolean hasAuthority(UserPrincipal principal, String permission) {
+        return principal.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(permission::equals);
     }
 }

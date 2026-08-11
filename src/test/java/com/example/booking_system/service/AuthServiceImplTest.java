@@ -59,12 +59,13 @@ class AuthServiceImplTest {
         user.setPassword("encodedPassword");
         user.setFullName("Test User");
         user.setRole(Role.ROLE_USER);
+        user.setActivated(true);
         userPrincipal = UserPrincipal.create(user);
     }
 
     @Test
     void register_SuccessfulRegistration() {
-        RegisterRequest registerRequest = new RegisterRequest("test@example.com", "password123", "Test User", Role.ROLE_USER);
+        RegisterRequest registerRequest = new RegisterRequest("test@example.com", "password123", "Test User");
 
         when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
@@ -88,6 +89,7 @@ class AuthServiceImplTest {
         assertEquals("test@example.com", userCaptor.getValue().getEmail());
         assertEquals("encodedPassword", userCaptor.getValue().getPassword());
         assertEquals(Role.ROLE_USER, userCaptor.getValue().getRole());
+        assertTrue(userCaptor.getValue().isActivated());
         assertEquals("test@example.com", userCaptor.getValue().getCreatedBy());
         assertNotNull(userCaptor.getValue().getCreatedDate());
         assertEquals("test@example.com", userCaptor.getValue().getLastModifiedBy());
@@ -95,8 +97,8 @@ class AuthServiceImplTest {
     }
 
     @Test
-    void register_DefaultRoleToUserWhenRoleIsNull() {
-        RegisterRequest registerRequest = new RegisterRequest("test@example.com", "password123", "Test User", null);
+    void register_AlwaysAssignsUserRole() {
+        RegisterRequest registerRequest = new RegisterRequest("test@example.com", "password123", "Test User");
 
         when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
@@ -113,11 +115,12 @@ class AuthServiceImplTest {
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         assertEquals(Role.ROLE_USER, userCaptor.getValue().getRole());
+        assertTrue(userCaptor.getValue().isActivated());
     }
 
     @Test
     void register_DuplicateEmailThrowsException() {
-        RegisterRequest registerRequest = new RegisterRequest("test@example.com", "password123", "Test User", Role.ROLE_USER);
+        RegisterRequest registerRequest = new RegisterRequest("test@example.com", "password123", "Test User");
 
         when(userRepository.existsByEmail("test@example.com")).thenReturn(true);
 

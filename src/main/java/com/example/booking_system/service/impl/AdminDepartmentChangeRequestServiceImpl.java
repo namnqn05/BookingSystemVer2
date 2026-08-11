@@ -64,17 +64,15 @@ public class AdminDepartmentChangeRequestServiceImpl implements AdminDepartmentC
         user.setDepartment(requestedDepartment);
         userRepository.save(user);
 
-        Notification notification = new Notification();
-        notification.setRecipientUser(user);
-        notification.setTitle("Department Change Request Approved");
-        notification.setMessage("Your request to change department to " + requestedDepartment.getName() + " has been approved.");
-        notification.setType(NotificationType.DEPT_CHANGE_APPROVED);
-        notification.setReferenceType("DEPARTMENT_CHANGE_REQUEST");
-        notification.setReferenceId(request.getId());
-        notification.setRead(false);
-        notification.setCreatedAt(Instant.now());
-        notification.setCreatedBy(adminUserId);
-        notificationRepository.save(notification);
+        notificationRepository.save(Notification.create(
+                user,
+                "Department Change Request Approved",
+                "Your request to change department to " + requestedDepartment.getName() + " has been approved.",
+                NotificationType.DEPT_CHANGE_APPROVED,
+                "DEPARTMENT_CHANGE_REQUEST",
+                request.getId(),
+                adminUserId
+        ));
 
         return mapToResponse(request);
     }
@@ -93,17 +91,15 @@ public class AdminDepartmentChangeRequestServiceImpl implements AdminDepartmentC
         User user = userRepository.findById(request.getUserId()).orElse(null);
         Department requestedDepartment = departmentRepository.findById(request.getRequestedDepartmentId()).orElse(null);
         if (user != null) {
-            Notification notification = new Notification();
-            notification.setRecipientUser(user);
-            notification.setTitle("Department Change Request Rejected");
-            notification.setMessage("Your request to change department" + (requestedDepartment != null ? " to " + requestedDepartment.getName() : "") + " has been rejected.");
-            notification.setType(NotificationType.DEPT_CHANGE_REJECTED);
-            notification.setReferenceType("DEPARTMENT_CHANGE_REQUEST");
-            notification.setReferenceId(request.getId());
-            notification.setRead(false);
-            notification.setCreatedAt(Instant.now());
-            notification.setCreatedBy(adminUserId);
-            notificationRepository.save(notification);
+            notificationRepository.save(Notification.create(
+                    user,
+                    "Department Change Request Rejected",
+                    "Your request to change department" + (requestedDepartment != null ? " to " + requestedDepartment.getName() : "") + " has been rejected.",
+                    NotificationType.DEPT_CHANGE_REJECTED,
+                    "DEPARTMENT_CHANGE_REQUEST",
+                    request.getId(),
+                    adminUserId
+            ));
         }
 
         return mapToResponse(request);
