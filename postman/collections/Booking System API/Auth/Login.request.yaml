@@ -1,0 +1,31 @@
+$kind: http-request
+name: Login
+method: POST
+url: '{{baseUrl}}/api/auth/login'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "admin@example.com",
+      "password": "password123"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (json.accessToken) {
+        pm.environment.set('token', json.accessToken);
+      }
+      pm.test('Status code is 200', () => { pm.response.to.have.status(200); });
+      pm.test('Response has accessToken', () => { pm.expect(json.accessToken).to.be.a('string').and.not.empty; });
+      pm.test('tokenType is Bearer', () => { pm.expect(json.tokenType).to.eql('Bearer'); });
+      pm.test('Response has id', () => { pm.expect(json.id).to.be.a('number'); });
+      pm.test('Response has email', () => { pm.expect(json.email).to.be.a('string').and.not.empty; });
+      pm.test('Response has fullName', () => { pm.expect(json.fullName).to.be.a('string').and.not.empty; });
+      pm.test('Response has role', () => { pm.expect(json.role).to.be.a('string').and.not.empty; });
+      pm.test('Token saved to environment', () => { pm.expect(pm.environment.get('token')).to.be.a('string').and.not.empty; });

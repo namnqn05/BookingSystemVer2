@@ -1,6 +1,7 @@
 package com.example.booking_system.dto.response;
 
 import com.example.booking_system.model.Room;
+import java.math.BigDecimal;
 
 public class RoomResponse {
 
@@ -8,23 +9,33 @@ public class RoomResponse {
     private String name;
     private Integer capacity;
     private Boolean isActive;
+    private BigDecimal pricePerHour;
 
     public RoomResponse() {
     }
 
     public RoomResponse(Long id, String name, Integer capacity, Boolean isActive) {
+        this(id, name, capacity, isActive, BigDecimal.ZERO);
+    }
+
+    public RoomResponse(Long id, String name, Integer capacity, Boolean isActive, BigDecimal pricePerHour) {
         this.id = id;
         this.name = name;
         this.capacity = capacity;
         this.isActive = isActive;
+        this.pricePerHour = pricePerHour;
     }
 
     public static RoomResponse fromEntity(Room room) {
+        if (room == null) {
+            return null;
+        }
         return new RoomResponse(
                 room.getId(),
                 room.getName(),
                 room.getCapacity(),
-                room.getIsActive()
+                room.getIsActive(),
+                room.getPricePerHour()
         );
     }
 
@@ -58,5 +69,13 @@ public class RoomResponse {
 
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
+    }
+
+    public BigDecimal getPricePerHour() {
+        return pricePerHour;
+    }
+
+    public void setPricePerHour(BigDecimal pricePerHour) {
+        this.pricePerHour = pricePerHour;
     }
 }

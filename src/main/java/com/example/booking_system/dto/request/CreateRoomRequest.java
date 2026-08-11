@@ -3,6 +3,7 @@ package com.example.booking_system.dto.request;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 public class CreateRoomRequest {
 
@@ -15,6 +16,8 @@ public class CreateRoomRequest {
 
     private Boolean isActive = true;
 
+    private BigDecimal pricePerHour;
+
     public CreateRoomRequest() {
     }
 
@@ -22,6 +25,13 @@ public class CreateRoomRequest {
         this.name = name;
         this.capacity = capacity;
         this.isActive = isActive != null ? isActive : true;
+    }
+
+    public CreateRoomRequest(String name, Integer capacity, Boolean isActive, BigDecimal pricePerHour) {
+        this.name = name;
+        this.capacity = capacity;
+        this.isActive = isActive != null ? isActive : true;
+        this.pricePerHour = pricePerHour;
     }
 
     public String getName() {
@@ -46,5 +56,13 @@ public class CreateRoomRequest {
 
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
+    }
+
+    public BigDecimal getPricePerHour() {
+        return pricePerHour;
+    }
+
+    public void setPricePerHour(BigDecimal pricePerHour) {
+        this.pricePerHour = pricePerHour;
     }
 }

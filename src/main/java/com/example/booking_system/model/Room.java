@@ -1,10 +1,12 @@
 package com.example.booking_system.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "rooms")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Room {
 
     @Id
@@ -25,7 +27,7 @@ public class Room {
     private Long lockedDepartmentId;
 
     @Column(name = "price_per_hour", nullable = false, precision = 19, scale = 2)
-    private BigDecimal pricePerHour;
+    private BigDecimal pricePerHour = BigDecimal.ZERO;
 
     public Room() {
     }

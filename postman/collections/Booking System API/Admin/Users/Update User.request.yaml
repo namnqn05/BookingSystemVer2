@@ -1,0 +1,34 @@
+$kind: http-request
+name: Update User
+method: PUT
+url: "{{baseUrl}}/api/admin/users/:id"
+order: 3000
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+pathVariables:
+  - key: id
+    value: "1"
+    description: User ID
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "admin@example.com",
+      "fullName": "Admin",
+      "role": "ROLE_ADMIN",
+      "activated": true,
+      "departmentId": 1
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      const json = pm.response.json();
+      pm.test('Status code is 200', () => { pm.response.to.have.status(200); });
+      pm.test('Response has id', () => { pm.expect(json.id).to.be.a('number'); });
+      pm.test('Response has email', () => { pm.expect(json.email).to.be.a('string').and.not.empty; });
+      pm.test('Response has fullName', () => { pm.expect(json.fullName).to.be.a('string').and.not.empty; });
+    language: text/javascript

@@ -49,9 +49,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<BookingResponse> getBookings(String date, Pageable pageable, UserPrincipal principal) {
+    public Page<BookingResponse> getBookings(String date, BookingStatus status, String q, Pageable pageable, UserPrincipal principal) {
+        expireOverduePendingBookings();
         boolean canViewAll = hasAuthority(principal, PermissionCodes.BOOKING_VIEW_ALL);
+
+        LocalDateTime start = null;
+        LocalDateTime end = null;
 
         if (date != null && !date.trim().isEmpty()) {
             LocalDate localDate;
@@ -60,25 +63,27 @@ public class BookingServiceImpl implements BookingService {
             } catch (Exception e) {
                 throw new IllegalArgumentException("Invalid date format. Expected yyyy-MM-dd");
             }
-            LocalDateTime start = localDate.atStartOfDay();
-            LocalDateTime end = localDate.plusDays(1).atStartOfDay();
-            if (canViewAll) {
-                return bookingRepository.findByDateRange(start, end, pageable).map(this::toResponse);
-            }
-            return bookingRepository.findByUserIdAndDateRange(principal.getId(), start, end, pageable)
-                    .map(this::toResponse);
+            start = localDate.atStartOfDay();
+            end = localDate.plusDays(1).atStartOfDay();
         }
 
+        String searchKeyword = (q != null && !q.trim().isEmpty()) ? q.trim() : null;
+
         if (canViewAll) {
-            return bookingRepository.findAll(pageable).map(this::toResponse);
+            return bookingRepository.findByDateRange(start, end, status, searchKeyword, pageable).map(this::toResponse);
         }
-        return bookingRepository.findByUserId(principal.getId(), pageable).map(this::toResponse);
+        return bookingRepository.findByUserIdAndDateRange(principal.getId(), start, end, status, searchKeyword, pageable)
+                .map(this::toResponse);
     }
 
     @Override
     public BookingResponse createBooking(CreateBookingRequest request, String userEmail) {
         if (!request.getEndTime().isAfter(request.getStartTime())) {
             throw new IllegalArgumentException("End time must be after start time");
+        }
+
+        if (request.getStartTime().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Cannot create a booking in the past");
         }
 
         Room room = roomRepository.findById(request.getRoomId())
@@ -147,7 +152,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found with ID: " + id));
 
         if (booking.getStatus() == BookingStatus.CANCELLED || booking.getStatus() == BookingStatus.EXPIRED) {
-            throw new IllegalArgumentException("Cannot approve a cancelled or rejected booking");
+            throw new IllegalArgumentException("Cannot approve a cancelled or expired booking");
         }
 
         User actorUser = userRepository.findByEmail(userEmail)
@@ -178,6 +183,10 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponse rejectBooking(Long id, String userEmail) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found with ID: " + id));
+
+        if (booking.getStatus() == BookingStatus.CANCELLED || booking.getStatus() == BookingStatus.EXPIRED) {
+            throw new IllegalArgumentException("Cannot reject a cancelled or expired booking");
+        }
 
         User actorUser = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -241,6 +250,36 @@ public class BookingServiceImpl implements BookingService {
         User user = userRepository.findById(booking.getUserId()).orElse(null);
 
         return BookingResponse.fromEntity(booking, room, user);
+    }
+
+    @Override
+    @Transactional
+    public int expireOverduePendingBookings() {
+        LocalDateTime now = LocalDateTime.now();
+        java.util.List<Booking> overdue = bookingRepository.findByStatusAndStartTimeLessThanEqual(BookingStatus.PENDING, now);
+        if (overdue.isEmpty()) {
+            return 0;
+        }
+
+        for (Booking booking : overdue) {
+            booking.setStatus(BookingStatus.EXPIRED);
+
+            User bookingOwner = userRepository.findById(booking.getUserId()).orElse(null);
+            if (bookingOwner != null) {
+                notificationRepository.save(Notification.create(
+                        bookingOwner,
+                        "Booking Expired",
+                        "Your booking request '" + booking.getTitle() + "' has expired.",
+                        NotificationType.BOOKING_EXPIRED,
+                        "BOOKING",
+                        booking.getId(),
+                        null
+                ));
+            }
+        }
+
+        bookingRepository.saveAll(overdue);
+        return overdue.size();
     }
 
     private boolean hasAuthority(UserPrincipal principal, String permission) {

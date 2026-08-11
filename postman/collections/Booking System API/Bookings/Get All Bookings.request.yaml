@@ -1,0 +1,33 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/api/bookings'
+order: 1000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+queryParams:
+  - key: date
+    value: '2026-08-11'
+    description: 'Optional date filter (e.g. 2024-01-15)'
+    disabled: true
+  - key: page
+    value: '0'
+  - key: size
+    value: '10'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      pm.test('Status code is 200', () => { pm.response.to.have.status(200); });
+      pm.test('Response is paginated (has content array)', () => { pm.expect(json.content).to.be.an('array'); });
+      pm.test('Response has totalElements', () => { pm.expect(json).to.have.property('totalElements'); });
+      if (json.content.length > 0) {
+        const b = json.content[0];
+        pm.test('Booking has id', () => { pm.expect(b.id).to.be.a('number'); });
+        pm.test('Booking has roomId', () => { pm.expect(b.roomId).to.be.a('number'); });
+        pm.test('Booking has status', () => { pm.expect(b.status).to.be.a('string'); });
+        pm.test('Booking has title', () => { pm.expect(b.title).to.be.a('string'); });
+      }

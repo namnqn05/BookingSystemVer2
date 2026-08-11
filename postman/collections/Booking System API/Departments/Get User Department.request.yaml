@@ -1,0 +1,17 @@
+$kind: http-request
+name: Get User Department
+method: GET
+url: "{{baseUrl}}/api/departments/user"
+order: 1000
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      const json = pm.response.json();
+      pm.test('Status code is 200', () => { pm.response.to.have.status(200); });
+      pm.test('Response has id', () => { pm.expect(json.id).to.be.a('number'); });
+      pm.test('Response has name', () => { pm.expect(json.name).to.be.a('string').and.not.empty; });
+    language: text/javascript

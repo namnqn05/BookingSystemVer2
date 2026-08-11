@@ -17,7 +17,7 @@ BEGIN;
 -- Clean existing seed data (safe re-run)
 TRUNCATE TABLE
     notifications,
-    department_change_request,
+    department_change_requests,
     bookings,
     rooms,
     role_permissions,
@@ -151,7 +151,7 @@ INSERT INTO bookings (
 -- -----------------------------------------------------------------------------
 -- 7. Department change requests (from original data.sql)
 -- -----------------------------------------------------------------------------
-INSERT INTO department_change_request (
+INSERT INTO department_change_requests (
     id, user_id, requested_department_id, status,
     reviewed_by_id, reviewed_date,
     created_by, created_date, last_modified_by, last_modified_date

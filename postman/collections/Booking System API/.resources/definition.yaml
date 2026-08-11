@@ -1,0 +1,6 @@
+$kind: collection
+name: Booking System API
+description: API collection for the Booking System - a meeting room booking application
+variables:
+  - key: baseUrl
+    value: 'http://localhost:8080'

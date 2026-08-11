@@ -18,7 +18,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByRole(com.example.booking_system.model.Role role);
 
     @Query("SELECT u FROM User u WHERE " +
-           "(:q IS NULL OR LOWER(u.email) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :q, '%'))) " +
-           "AND (:activated IS NULL OR u.activated = :activated)")
+           "(CAST(:q AS string) IS NULL OR LOWER(u.email) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%')) OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%'))) " +
+           "AND (CAST(:activated AS boolean) IS NULL OR u.activated = :activated)")
     Page<User> findAllUsersWithPaginationAndSearch(@Param("q") String q, @Param("activated") Boolean activated, Pageable pageable);
 }

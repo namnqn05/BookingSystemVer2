@@ -87,7 +87,7 @@ public class UserDepartmentChangeRequestServiceImpl implements UserDepartmentCha
 
         DepartmentChangeRequest changeRequest = new DepartmentChangeRequest();
         changeRequest.setUserId(userId);
-        changeRequest.setRequestedDepartmentId(targetDeptId);
+        changeRequest.setRequestedDepartment(targetDept);
         changeRequest.setStatus(DepartmentChangeRequestStatus.PENDING);
         changeRequest.setCreatedBy(user.getEmail() != null ? user.getEmail() : "user_" + userId);
         changeRequest.setCreatedDate(Instant.now());
@@ -113,7 +113,7 @@ public class UserDepartmentChangeRequestServiceImpl implements UserDepartmentCha
 
     private DepartmentChangeRequestResponse mapToResponse(DepartmentChangeRequest request) {
         User user = userRepository.findById(request.getUserId()).orElse(null);
-        Department requestedDepartment = departmentRepository.findById(request.getRequestedDepartmentId()).orElse(null);
+        Department requestedDepartment = request.getRequestedDepartment();
 
         String userEmail = user != null ? user.getEmail() : null;
         String userFullName = user != null ? user.getFullName() : null;

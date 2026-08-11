@@ -1,10 +1,12 @@
 package com.example.booking_system.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "department_change_request")
+@Table(name = "department_change_requests")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class DepartmentChangeRequest {
 
     @Id
@@ -15,8 +17,9 @@ public class DepartmentChangeRequest {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "requested_department_id", nullable = false)
-    private Long requestedDepartmentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "requested_department_id", nullable = false)
+    private Department requestedDepartment;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -59,12 +62,12 @@ public class DepartmentChangeRequest {
         this.userId = userId;
     }
 
-    public Long getRequestedDepartmentId() {
-        return requestedDepartmentId;
+    public Department getRequestedDepartment() {
+        return requestedDepartment;
     }
 
-    public void setRequestedDepartmentId(Long requestedDepartmentId) {
-        this.requestedDepartmentId = requestedDepartmentId;
+    public void setRequestedDepartment(Department requestedDepartment) {
+        this.requestedDepartment = requestedDepartment;
     }
 
     public DepartmentChangeRequestStatus getStatus() {

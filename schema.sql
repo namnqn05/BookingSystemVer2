@@ -58,8 +58,8 @@ CREATE TABLE booking (
     CONSTRAINT fk_booking_user FOREIGN KEY (user_id) REFERENCES jhi_user(id)
 );
 
--- 5. department_change_request
-CREATE TABLE department_change_request (
+-- 5. department_change_requests
+CREATE TABLE department_change_requests (
     id bigint NOT NULL PRIMARY KEY,
     user_id bigint NOT NULL,
     requested_department_id bigint NOT NULL,

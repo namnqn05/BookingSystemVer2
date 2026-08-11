@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 public class RoomServiceImpl implements RoomService {
 
@@ -35,6 +37,7 @@ public class RoomServiceImpl implements RoomService {
         room.setName(request.getName());
         room.setCapacity(request.getCapacity());
         room.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
+        room.setPricePerHour(request.getPricePerHour() != null ? request.getPricePerHour() : BigDecimal.ZERO);
 
         Room savedRoom = roomRepository.save(room);
         return RoomResponse.fromEntity(savedRoom);
@@ -58,6 +61,10 @@ public class RoomServiceImpl implements RoomService {
 
         if (request.getIsActive() != null) {
             room.setIsActive(request.getIsActive());
+        }
+
+        if (request.getPricePerHour() != null) {
+            room.setPricePerHour(request.getPricePerHour());
         }
 
         Room updatedRoom = roomRepository.save(room);
