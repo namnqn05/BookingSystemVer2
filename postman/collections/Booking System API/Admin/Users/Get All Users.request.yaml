@@ -1,0 +1,36 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/api/admin/users'
+order: 1000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+queryParams:
+  - key: q
+    value: ''
+    description: Optional search query
+    disabled: true
+  - key: activated
+    value: 'true'
+    description: Optional boolean filter
+    disabled: true
+  - key: page
+    value: '0'
+  - key: size
+    value: '10'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      pm.test('Status code is 200', () => { pm.response.to.have.status(200); });
+      pm.test('Response is paginated (has content array)', () => { pm.expect(json.content).to.be.an('array'); });
+      pm.test('Response has totalElements', () => { pm.expect(json).to.have.property('totalElements'); });
+      if (json.content.length > 0) {
+        const u = json.content[0];
+        pm.test('User has id', () => { pm.expect(u.id).to.be.a('number'); });
+        pm.test('User has email', () => { pm.expect(u.email).to.be.a('string').and.not.empty; });
+        pm.test('User has fullName', () => { pm.expect(u.fullName).to.be.a('string'); });
+      }

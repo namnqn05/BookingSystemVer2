@@ -1,0 +1,31 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/api/rooms'
+order: 2000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Conference Room A",
+      "capacity": 10,
+      "isActive": true
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      pm.test('Status code is 201', () => { pm.response.to.have.status(201); });
+      pm.test('Response has id', () => { pm.expect(json.id).to.be.a('number'); });
+      pm.test('Response has name', () => { pm.expect(json.name).to.be.a('string').and.not.empty; });
+      pm.test('Response has capacity', () => { pm.expect(json.capacity).to.be.a('number'); });
+      pm.test('Response has isActive', () => { pm.expect(json).to.have.property('isActive'); });
+      if (json.id) { pm.environment.set('roomId', json.id); }

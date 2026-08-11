@@ -12,20 +12,33 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.booking_system.model.BookingStatus;
+
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    @Query("SELECT b FROM Booking b " +
-           "WHERE b.startTime < :end AND b.endTime > :start ")
+    @Query("SELECT b FROM Booking b WHERE " +
+           "(CAST(:start AS timestamp) IS NULL OR b.endTime > :start) AND " +
+           "(CAST(:end AS timestamp) IS NULL OR b.startTime < :end) AND " +
+           "(CAST(:status AS string) IS NULL OR b.status = :status) AND " +
+           "(CAST(:q AS string) IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%')))")
     Page<Booking> findByDateRange(@Param("start") LocalDateTime start,
                                   @Param("end") LocalDateTime end,
+                                  @Param("status") BookingStatus status,
+                                  @Param("q") String q,
                                   Pageable pageable);
 
-    @Query("SELECT b FROM Booking b " +
-           "WHERE b.userId = :userId AND b.startTime < :end AND b.endTime > :start ")
+    @Query("SELECT b FROM Booking b WHERE " +
+           "b.userId = :userId AND " +
+           "(CAST(:start AS timestamp) IS NULL OR b.endTime > :start) AND " +
+           "(CAST(:end AS timestamp) IS NULL OR b.startTime < :end) AND " +
+           "(CAST(:status AS string) IS NULL OR b.status = :status) AND " +
+           "(CAST(:q AS string) IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%')))")
     Page<Booking> findByUserIdAndDateRange(@Param("userId") Long userId,
                                            @Param("start") LocalDateTime start,
                                            @Param("end") LocalDateTime end,
+                                           @Param("status") BookingStatus status,
+                                           @Param("q") String q,
                                            Pageable pageable);
 
     Page<Booking> findByUserId(Long userId, Pageable pageable);
@@ -39,11 +52,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                      @Param("startTime") LocalDateTime startTime,
                                      @Param("endTime") LocalDateTime endTime);
 
-    @Query("SELECT b FROM Booking b WHERE b.userId = :userId AND (:q IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :q, '%')))")
+    @Query("SELECT b FROM Booking b WHERE b.userId = :userId AND (CAST(:q AS string) IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%')))")
     Page<Booking> findBookingsByUserIdWithSearch(@Param("userId") Long userId, @Param("q") String q, Pageable pageable);
 
     @Query("SELECT b FROM Booking b WHERE b.startTime >= :start AND b.startTime < :end")
     List<Booking> findByStartTimeBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     List<Booking> findByUserIdOrderByStartTimeDesc(Long userId);
+
+    @Query("SELECT b FROM Booking b WHERE b.status = :status AND b.startTime <= :now")
+    List<Booking> findByStatusAndStartTimeLessThanEqual(@Param("status") BookingStatus status, @Param("now") LocalDateTime now);
 }

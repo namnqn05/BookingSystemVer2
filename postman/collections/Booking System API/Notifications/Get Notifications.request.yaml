@@ -1,0 +1,28 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/api/notifications'
+order: 1000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+queryParams:
+  - key: page
+    value: '0'
+  - key: size
+    value: '10'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      pm.test('Status code is 200', () => { pm.response.to.have.status(200); });
+      pm.test('Response is paginated (has content array)', () => { pm.expect(json.content).to.be.an('array'); });
+      pm.test('Response has totalElements', () => { pm.expect(json).to.have.property('totalElements'); });
+      if (json.content.length > 0) {
+        const n = json.content[0];
+        pm.test('Notification has id', () => { pm.expect(n.id).to.be.a('number'); });
+        pm.test('Notification has title', () => { pm.expect(n.title).to.be.a('string'); });
+        pm.test('Notification has isRead field', () => { pm.expect(n).to.have.property('read'); });
+      }

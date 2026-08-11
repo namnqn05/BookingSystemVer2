@@ -2,14 +2,13 @@ package com.example.booking_system.dto.response;
 
 import com.example.booking_system.model.Notification;
 import com.example.booking_system.model.NotificationType;
-import com.example.booking_system.model.User;
 
 import java.time.Instant;
 
 public class NotificationResponse {
 
     private Long id;
-    private User recipientUser;
+    private UserResponse recipientUser;
     private String title;
     private String message;
     private NotificationType type;
@@ -23,9 +22,9 @@ public class NotificationResponse {
     public NotificationResponse() {
     }
 
-    public NotificationResponse(Long id, User recipientUser, String title, String message,
-                                NotificationType type, String referenceType, Long referenceId,
-                                boolean isRead, Instant createdAt, Instant readAt, Long createdBy) {
+    public NotificationResponse(Long id, UserResponse recipientUser, String title, String message,
+            NotificationType type, String referenceType, Long referenceId,
+            boolean isRead, Instant createdAt, Instant readAt, Long createdBy) {
         this.id = id;
         this.recipientUser = recipientUser;
         this.title = title;
@@ -40,9 +39,17 @@ public class NotificationResponse {
     }
 
     public static NotificationResponse fromEntity(Notification notification) {
+        if (notification == null) {
+            return null;
+        }
+
+        UserResponse recipientUserResponse = notification.getRecipientUser() != null
+                ? UserResponse.fromEntity(notification.getRecipientUser())
+                : null;
+
         return new NotificationResponse(
                 notification.getId(),
-                notification.getRecipientUser(),
+                recipientUserResponse,
                 notification.getTitle(),
                 notification.getMessage(),
                 notification.getType(),
@@ -51,8 +58,7 @@ public class NotificationResponse {
                 notification.isRead(),
                 notification.getCreatedAt(),
                 notification.getReadAt(),
-                notification.getCreatedBy()
-        );
+                notification.getCreatedBy());
     }
 
     public Long getId() {
@@ -63,11 +69,11 @@ public class NotificationResponse {
         this.id = id;
     }
 
-    public User getRecipientUser() {
+    public UserResponse getRecipientUser() {
         return recipientUser;
     }
 
-    public void setRecipientUser(User recipientUser) {
+    public void setRecipientUser(UserResponse recipientUser) {
         this.recipientUser = recipientUser;
     }
 

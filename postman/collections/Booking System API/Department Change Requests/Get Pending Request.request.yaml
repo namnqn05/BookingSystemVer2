@@ -1,0 +1,21 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/api/department-change-requests/pending'
+order: 1000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 200 or 404', () => {
+        pm.expect(pm.response.code).to.be.oneOf([200, 404]);
+      });
+      if (pm.response.code === 200) {
+        const json = pm.response.json();
+        pm.test('Response has id', () => { pm.expect(json.id).to.be.a('number'); });
+        pm.test('Response has status', () => { pm.expect(json.status).to.be.a('string'); });
+      }

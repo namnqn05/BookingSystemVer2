@@ -1,0 +1,34 @@
+$kind: http-request
+name: 'Update Room'
+method: PATCH
+url: '{{baseUrl}}/api/rooms/:id'
+order: 3000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+pathVariables:
+  - key: id
+    value: '1'
+    description: Room ID (Admin only)
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Updated Room",
+      "capacity": 15,
+      "isActive": true
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      pm.test('Status code is 200', () => { pm.response.to.have.status(200); });
+      pm.test('Response has id', () => { pm.expect(json.id).to.be.a('number'); });
+      pm.test('Response has name', () => { pm.expect(json.name).to.be.a('string').and.not.empty; });
+      pm.test('Response has capacity', () => { pm.expect(json.capacity).to.be.a('number'); });

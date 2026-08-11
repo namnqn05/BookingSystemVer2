@@ -2,6 +2,7 @@ package com.example.booking_system.controller;
 
 import com.example.booking_system.dto.request.CreateBookingRequest;
 import com.example.booking_system.dto.response.BookingResponse;
+import com.example.booking_system.model.BookingStatus;
 import com.example.booking_system.security.UserPrincipal;
 import com.example.booking_system.service.BookingService;
 import jakarta.validation.Valid;
@@ -25,9 +26,11 @@ public class BookingController {
     @GetMapping
     public ResponseEntity<Page<BookingResponse>> getAllBookings(
             @RequestParam(required = false) String date,
+            @RequestParam(required = false) BookingStatus status,
+            @RequestParam(required = false) String q,
             Pageable pageable,
             @AuthenticationPrincipal UserPrincipal principal) {
-        return ResponseEntity.ok(bookingService.getBookings(date, pageable, principal));
+        return ResponseEntity.ok(bookingService.getAllBookings(date, status, q, pageable, principal));
     }
 
     @PostMapping

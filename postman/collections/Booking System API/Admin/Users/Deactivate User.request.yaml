@@ -1,0 +1,22 @@
+$kind: http-request
+name: 'Deactivate User'
+method: PATCH
+url: '{{baseUrl}}/api/admin/users/:id/deactivate'
+order: 4000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+pathVariables:
+  - key: id
+    value: '1'
+    description: User ID
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 200', () => { pm.response.to.have.status(200); });
+      const json = pm.response.json();
+      pm.test('User is deactivated', () => { pm.expect(json.activated).to.eql(false); });
+      pm.test('Response has id', () => { pm.expect(json.id).to.be.a('number'); });

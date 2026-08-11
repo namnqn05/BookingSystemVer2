@@ -14,8 +14,11 @@ import java.util.List;
 @Repository
 public interface DepartmentChangeRequestRepository extends JpaRepository<DepartmentChangeRequest, Long> {
 
-    @Query("SELECT r FROM DepartmentChangeRequest r WHERE (:status IS NULL OR r.status = :status)")
-    Page<DepartmentChangeRequest> findAllByStatusWithPagination(@Param("status") DepartmentChangeRequestStatus status, Pageable pageable);
+    Page<DepartmentChangeRequest> findByStatus(DepartmentChangeRequestStatus status, Pageable pageable);
+
+    @Query("SELECT r FROM DepartmentChangeRequest r WHERE (CAST(:status AS string) IS NULL OR r.status = :status)")
+    Page<DepartmentChangeRequest> findAllByStatusWithPagination(@Param("status") DepartmentChangeRequestStatus status,
+            Pageable pageable);
 
     List<DepartmentChangeRequest> findByUserIdAndStatus(Long userId, DepartmentChangeRequestStatus status);
 }

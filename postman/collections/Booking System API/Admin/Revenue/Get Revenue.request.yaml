@@ -1,0 +1,27 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/api/admin/revenue'
+order: 1000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+queryParams:
+  - key: yearMonth
+    value: '2026-08'
+    description: 'Optional year-month filter (e.g. 2024-01)'
+    disabled: true
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      pm.test('Status code is 200', () => { pm.response.to.have.status(200); });
+      pm.test('Response is an array of revenue periods', () => { pm.expect(json).to.be.an('array'); });
+      if (json.length > 0) {
+        const r = json[0];
+        pm.test('Revenue period has yearMonth', () => { pm.expect(r.yearMonth).to.be.a('string'); });
+        pm.test('Revenue period has totalAmount', () => { pm.expect(r).to.have.property('totalAmount'); });
+        pm.test('Revenue period has totalBookings', () => { pm.expect(r).to.have.property('totalBookings'); });
+      }

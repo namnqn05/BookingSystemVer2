@@ -1,0 +1,20 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/api/account'
+order: 1000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      pm.test('Status code is 200', () => { pm.response.to.have.status(200); });
+      pm.test('Response has id', () => { pm.expect(json.id).to.be.a('number'); });
+      pm.test('Response has email', () => { pm.expect(json.email).to.be.a('string').and.not.empty; });
+      pm.test('Response has fullName', () => { pm.expect(json.fullName).to.be.a('string').and.not.empty; });
+      pm.test('Response has activated field', () => { pm.expect(json).to.have.property('activated'); });
+      pm.test('Response has role array', () => { pm.expect(json.role).to.be.an('array').and.not.empty; });

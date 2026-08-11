@@ -1,0 +1,27 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/api/department-change-requests'
+order: 2000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "requestedDepartmentId": 2
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      pm.test('Status code is 201', () => { pm.response.to.have.status(201); });
+      pm.test('Response has id', () => { pm.expect(json.id).to.be.a('number'); });
+      pm.test('Response has status PENDING', () => { pm.expect(json.status).to.eql('PENDING'); });
+      pm.test('Response has requestedDepartment', () => { pm.expect(json.requestedDepartment).to.exist; });

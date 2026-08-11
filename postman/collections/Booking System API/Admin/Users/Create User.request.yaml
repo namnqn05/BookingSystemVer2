@@ -1,0 +1,34 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/api/admin/users'
+order: 2000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "newuser@example.com",
+      "password": "password123",
+      "fullName": "Jane Doe",
+      "role": "USER",
+      "activated": true,
+      "departmentId": 1
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      pm.test('Status code is 201', () => { pm.response.to.have.status(201); });
+      pm.test('Response has id', () => { pm.expect(json.id).to.be.a('number'); });
+      pm.test('Response has email', () => { pm.expect(json.email).to.be.a('string').and.not.empty; });
+      pm.test('Response has fullName', () => { pm.expect(json.fullName).to.be.a('string').and.not.empty; });
+      pm.test('Response has role', () => { pm.expect(json.role).to.exist; });
+      if (json.id) { pm.environment.set('userId', json.id); }

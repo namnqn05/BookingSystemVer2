@@ -41,8 +41,10 @@ public class AdminDepartmentChangeRequestServiceImpl implements AdminDepartmentC
 
     @Override
     public Page<DepartmentChangeRequestResponse> getRequests(DepartmentChangeRequestStatus status, Pageable pageable) {
-        return departmentChangeRequestRepository.findAllByStatusWithPagination(status, pageable)
-                .map(this::mapToResponse);
+        Page<DepartmentChangeRequest> page = (status == null)
+                ? departmentChangeRequestRepository.findAll(pageable)
+                : departmentChangeRequestRepository.findByStatus(status, pageable);
+        return page.map(this::mapToResponse);
     }
 
     @Override
@@ -58,8 +60,10 @@ public class AdminDepartmentChangeRequestServiceImpl implements AdminDepartmentC
 
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + request.getUserId()));
-        Department requestedDepartment = departmentRepository.findById(request.getRequestedDepartmentId())
-                .orElseThrow(() -> new IllegalArgumentException("Department not found with id: " + request.getRequestedDepartmentId()));
+        Department requestedDepartment = request.getRequestedDepartment();
+        if (requestedDepartment == null) {
+            throw new IllegalArgumentException("Requested department not found on request id: " + id);
+        }
 
         user.setDepartment(requestedDepartment);
         userRepository.save(user);
@@ -89,7 +93,7 @@ public class AdminDepartmentChangeRequestServiceImpl implements AdminDepartmentC
         departmentChangeRequestRepository.save(request);
 
         User user = userRepository.findById(request.getUserId()).orElse(null);
-        Department requestedDepartment = departmentRepository.findById(request.getRequestedDepartmentId()).orElse(null);
+        Department requestedDepartment = request.getRequestedDepartment();
         if (user != null) {
             notificationRepository.save(Notification.create(
                     user,
@@ -107,7 +111,7 @@ public class AdminDepartmentChangeRequestServiceImpl implements AdminDepartmentC
 
     private DepartmentChangeRequestResponse mapToResponse(DepartmentChangeRequest request) {
         User user = userRepository.findById(request.getUserId()).orElse(null);
-        Department requestedDepartment = departmentRepository.findById(request.getRequestedDepartmentId()).orElse(null);
+        Department requestedDepartment = request.getRequestedDepartment();
 
         String userEmail = user != null ? user.getEmail() : null;
         String userFullName = user != null ? user.getFullName() : null;
