@@ -1,0 +1,12 @@
+.git
+.mvn
+target
+.idea
+.vscode
+*.iml
+*.log
+.postman
+docs
+PROJECT_REVIEW_PLAN.md
+DOMAIN_SCHEMA.md
+write_tests.py
