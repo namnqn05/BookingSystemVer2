@@ -21,10 +21,20 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                   @Param("end") LocalDateTime end,
                                   Pageable pageable);
 
+    @Query("SELECT b FROM Booking b " +
+           "WHERE b.userId = :userId AND b.startTime < :end AND b.endTime > :start ")
+    Page<Booking> findByUserIdAndDateRange(@Param("userId") Long userId,
+                                           @Param("start") LocalDateTime start,
+                                           @Param("end") LocalDateTime end,
+                                           Pageable pageable);
+
+    Page<Booking> findByUserId(Long userId, Pageable pageable);
+
     @Query("SELECT COUNT(b) > 0 FROM Booking b " +
            "WHERE b.roomId = :roomId " +
-           "AND b.status IN ('PENDING', 'APPROVED') " +
-           "AND :startTime < b.endTime AND b.startTime < :endTime ")
+           "AND b.status IN (com.example.booking_system.model.BookingStatus.PENDING, " +
+           "                 com.example.booking_system.model.BookingStatus.APPROVED) " +
+           "AND :startTime < b.endTime AND b.startTime < :endTime")
     boolean existsOverlappingBooking(@Param("roomId") Long roomId,
                                      @Param("startTime") LocalDateTime startTime,
                                      @Param("endTime") LocalDateTime endTime);

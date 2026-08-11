@@ -96,17 +96,16 @@ public class UserDepartmentChangeRequestServiceImpl implements UserDepartmentCha
 
         List<User> admins = userRepository.findByRole(Role.ROLE_ADMIN);
         for (User admin : admins) {
-            Notification notification = new Notification();
-            notification.setRecipientUser(admin);
-            notification.setTitle("New Department Change Request");
-            notification.setMessage("User " + (user.getFullName() != null ? user.getFullName() : user.getEmail()) + " requested to change department to " + targetDept.getName() + ".");
-            notification.setType(NotificationType.DEPT_CHANGE_PENDING);
-            notification.setReferenceType("DEPARTMENT_CHANGE_REQUEST");
-            notification.setReferenceId(saved.getId());
-            notification.setRead(false);
-            notification.setCreatedAt(Instant.now());
-            notification.setCreatedBy(user.getId());
-            notificationRepository.save(notification);
+            notificationRepository.save(Notification.create(
+                    admin,
+                    "New Department Change Request",
+                    "User " + (user.getFullName() != null ? user.getFullName() : user.getEmail())
+                            + " requested to change department to " + targetDept.getName() + ".",
+                    NotificationType.DEPT_CHANGE_PENDING,
+                    "DEPARTMENT_CHANGE_REQUEST",
+                    saved.getId(),
+                    user.getId()
+            ));
         }
 
         return mapToResponse(saved);

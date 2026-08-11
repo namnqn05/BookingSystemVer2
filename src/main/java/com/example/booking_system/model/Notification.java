@@ -47,6 +47,27 @@ public class Notification {
     public Notification() {
     }
 
+    public static Notification create(
+            User recipient,
+            String title,
+            String message,
+            NotificationType type,
+            String referenceType,
+            Long referenceId,
+            Long createdBy) {
+        Notification notification = new Notification();
+        notification.setRecipientUser(recipient);
+        notification.setTitle(title);
+        notification.setMessage(message);
+        notification.setType(type);
+        notification.setReferenceType(referenceType);
+        notification.setReferenceId(referenceId);
+        notification.setRead(false);
+        notification.setCreatedAt(Instant.now());
+        notification.setCreatedBy(createdBy);
+        return notification;
+    }
+
     public Long getId() {
         return id;
     }
