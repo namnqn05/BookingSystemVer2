@@ -8,4 +8,5 @@ public interface NotificationService {
     Page<NotificationResponse> getUserNotifications(Long userId, Pageable pageable);
     NotificationResponse setNotificationRead(Long id, Long userId);
     void setAllNotificationRead(Long userId);
+    long countUnreadNotifications(Long userId);
 }

@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/notifications")
 public class NotificationController {
@@ -28,6 +30,13 @@ public class NotificationController {
             @AuthenticationPrincipal UserPrincipal principal,
             Pageable pageable) {
         return ResponseEntity.ok(notificationService.getUserNotifications(principal.getId(), pageable));
+    }
+
+    @GetMapping("/unread-count")
+    public ResponseEntity<Map<String, Long>> unreadNotificationCount(
+            @AuthenticationPrincipal UserPrincipal principal) {
+        long count = notificationService.countUnreadNotifications(principal.getId());
+        return ResponseEntity.ok(Map.of("count", count));
     }
 
     @PostMapping("/{id}/read")

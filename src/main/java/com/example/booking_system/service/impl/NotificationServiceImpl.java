@@ -49,4 +49,9 @@ public class NotificationServiceImpl implements NotificationService {
     public void setAllNotificationRead(Long userId) {
         notificationRepository.markAllAsReadForUser(userId, Instant.now());
     }
+
+    @Override
+    public long countUnreadNotifications(Long userId) {
+        return notificationRepository.countUnreadByRecipientUserId(userId);
+    }
 }
