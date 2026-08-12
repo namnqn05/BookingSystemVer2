@@ -13,7 +13,7 @@ INSERT INTO departments (id, code, name) VALUES
 (2, 'HR', 'Human Resources'),
 (3, 'SALES', 'Sales & Marketing'),
 (4, 'FIN', 'Finance & Accounting')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------------------------------------
 -- 2. Permissions
@@ -47,7 +47,7 @@ INSERT INTO permissions (id, code, description) VALUES
 (26, 'USER_DEACTIVATE', 'Deactivate users'),
 (27, 'REVENUE_VIEW', 'View revenue reports'),
 (28, 'REVENUE_EXPORT', 'Export revenue reports')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------------------------------------
 -- 3. Role permissions
@@ -61,7 +61,7 @@ WHERE p.code IN (
     'NOTIFICATION_READ', 'NOTIFICATION_MARK_READ',
     'DEPARTMENT_VIEW_OWN', 'DEPT_CHANGE_VIEW_OWN', 'DEPT_CHANGE_REQUEST'
 )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 INSERT INTO role_permissions (id, role, permission_id)
 SELECT 200 + row_number() OVER (), 'ROLE_ADMIN', p.id
@@ -77,7 +77,7 @@ WHERE p.code IN (
     'USER_VIEW', 'USER_CREATE', 'USER_UPDATE', 'USER_DEACTIVATE',
     'REVENUE_VIEW', 'REVENUE_EXPORT'
 )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------------------------------------
 -- 4. Users
@@ -106,7 +106,7 @@ INSERT INTO users (
     '$2a$10$TVWj3hxNF3ZFhNGEwUXSmO0sQTPFOOie0BwjxhGSvPlc70UqiEKy6',
     'Alice Brown', FALSE, 4, 'ROLE_USER',
     'system', '2026-01-05 11:00:00+00', 'system', '2026-01-05 11:00:00+00')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------------------------------------
 -- 5. Rooms
@@ -117,7 +117,7 @@ INSERT INTO rooms (id, name, capacity, is_active, locked_department_id, price_pe
 (3, 'HR Interview Room', 4, TRUE, 2, 15.00),
 (4, 'Executive Boardroom', 15, TRUE, NULL, 100.00),
 (5, 'Renovation Room 105', 10, FALSE, NULL, 30.00)
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------------------------------------
 -- 6. Bookings
@@ -130,7 +130,7 @@ INSERT INTO bookings (
 (3, 'Candidate Screening', '2026-08-17 10:00:00', '2026-08-17 11:30:00', 'PENDING', 3, 3, 15.00, 22.50),
 (4, 'Sales Pitch Presentation', '2026-08-18 13:00:00', '2026-08-18 15:00:00', 'CANCELLED', 4, 4, 100.00, 200.00),
 (5, 'Historical Training Session', '2026-07-01 09:00:00', '2026-07-01 12:00:00', 'EXPIRED', 1, 3, 50.00, 150.00)
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------------------------------------
 -- 7. Department change requests
@@ -146,7 +146,7 @@ INSERT INTO department_change_requests (
     'bob_wilson', '2026-08-01 11:00:00+00', 'admin', '2026-08-02 14:00:00+00'),
 (3, 5, 3, 'REJECTED', 1, '2026-08-03 16:00:00+00',
     'alice_brown', '2026-08-02 09:00:00+00', 'admin', '2026-08-03 16:00:00+00')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------------------------------------
 -- 8. Notifications
@@ -183,7 +183,7 @@ INSERT INTO notifications (
     'New booking request "Candidate Screening" submitted by Jane Smith.',
     'BOOKING_PENDING', 'BOOKING', 3,
     FALSE, '2026-08-10 09:00:00+00', NULL, 3)
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------------------------------------
 -- 9. Sequence
