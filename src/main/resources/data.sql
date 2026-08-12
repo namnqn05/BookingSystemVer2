@@ -130,11 +130,11 @@ INSERT INTO users (
 -- 5. Rooms (from original data.sql)
 -- -----------------------------------------------------------------------------
 INSERT INTO rooms (id, name, capacity, is_active, locked_department_id, price_per_hour) VALUES
-(1, 'Grand Conference Room', 20, TRUE, NULL, 50.00),
+(1, 'Grand Conference Room', 20, TRUE, 1, 50.00),
 (2, 'IT Lab Room', 8, TRUE, 1, 25.00),
 (3, 'HR Interview Room', 4, TRUE, 2, 15.00),
-(4, 'Executive Boardroom', 15, TRUE, NULL, 100.00),
-(5, 'Renovation Room 105', 10, FALSE, NULL, 30.00);
+(4, 'Executive Boardroom', 15, TRUE, 3, 100.00),
+(5, 'Renovation Room 105', 10, FALSE, 4, 30.00);
 
 -- -----------------------------------------------------------------------------
 -- 6. Bookings (from original data.sql)

@@ -14,6 +14,8 @@ public class UpdateRoomRequest {
 
     private BigDecimal pricePerHour;
 
+    private Long lockedDepartmentId;
+
     public UpdateRoomRequest() {
     }
 
@@ -28,6 +30,14 @@ public class UpdateRoomRequest {
         this.capacity = capacity;
         this.isActive = isActive;
         this.pricePerHour = pricePerHour;
+    }
+
+    public UpdateRoomRequest(String name, Integer capacity, Boolean isActive, BigDecimal pricePerHour, Long lockedDepartmentId) {
+        this.name = name;
+        this.capacity = capacity;
+        this.isActive = isActive;
+        this.pricePerHour = pricePerHour;
+        this.lockedDepartmentId = lockedDepartmentId;
     }
 
     public String getName() {
@@ -60,5 +70,13 @@ public class UpdateRoomRequest {
 
     public void setPricePerHour(BigDecimal pricePerHour) {
         this.pricePerHour = pricePerHour;
+    }
+
+    public Long getLockedDepartmentId() {
+        return lockedDepartmentId;
+    }
+
+    public void setLockedDepartmentId(Long lockedDepartmentId) {
+        this.lockedDepartmentId = lockedDepartmentId;
     }
 }

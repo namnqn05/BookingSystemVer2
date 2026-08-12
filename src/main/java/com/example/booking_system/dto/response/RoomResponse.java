@@ -10,20 +10,26 @@ public class RoomResponse {
     private Integer capacity;
     private Boolean isActive;
     private BigDecimal pricePerHour;
+    private Long lockedDepartmentId;
 
     public RoomResponse() {
     }
 
     public RoomResponse(Long id, String name, Integer capacity, Boolean isActive) {
-        this(id, name, capacity, isActive, BigDecimal.ZERO);
+        this(id, name, capacity, isActive, BigDecimal.ZERO, null);
     }
 
     public RoomResponse(Long id, String name, Integer capacity, Boolean isActive, BigDecimal pricePerHour) {
+        this(id, name, capacity, isActive, pricePerHour, null);
+    }
+
+    public RoomResponse(Long id, String name, Integer capacity, Boolean isActive, BigDecimal pricePerHour, Long lockedDepartmentId) {
         this.id = id;
         this.name = name;
         this.capacity = capacity;
         this.isActive = isActive;
         this.pricePerHour = pricePerHour;
+        this.lockedDepartmentId = lockedDepartmentId;
     }
 
     public static RoomResponse fromEntity(Room room) {
@@ -35,7 +41,8 @@ public class RoomResponse {
                 room.getName(),
                 room.getCapacity(),
                 room.getIsActive(),
-                room.getPricePerHour()
+                room.getPricePerHour(),
+                room.getLockedDepartmentId()
         );
     }
 
@@ -77,5 +84,13 @@ public class RoomResponse {
 
     public void setPricePerHour(BigDecimal pricePerHour) {
         this.pricePerHour = pricePerHour;
+    }
+
+    public Long getLockedDepartmentId() {
+        return lockedDepartmentId;
+    }
+
+    public void setLockedDepartmentId(Long lockedDepartmentId) {
+        this.lockedDepartmentId = lockedDepartmentId;
     }
 }

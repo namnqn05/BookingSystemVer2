@@ -35,11 +35,11 @@ INSERT INTO users (
 INSERT INTO rooms (
     id, name, capacity, is_active, locked_department_id, price_per_hour
 ) VALUES
-(1, 'Grand Conference Room', 20, true, NULL, 50.00),
+(1, 'Grand Conference Room', 20, true, 1, 50.00),
 (2, 'IT Lab Room', 8, true, 1, 25.00),
 (3, 'HR Interview Room', 4, true, 2, 15.00),
-(4, 'Executive Boardroom', 15, true, NULL, 100.00),
-(5, 'Renovation Room 105', 10, false, NULL, 30.00);
+(4, 'Executive Boardroom', 15, true, 3, 100.00),
+(5, 'Renovation Room 105', 10, false, 4, 30.00);
 
 -- -----------------------------------------------------------------------------
 -- 4. Insert Bookings

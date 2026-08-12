@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface RoomService {
     Page<RoomResponse> getAllRooms(Pageable pageable);
+    Page<RoomResponse> getAllRooms(String q, Boolean active, Pageable pageable);
     RoomResponse createRoom(CreateRoomRequest request);
     RoomResponse updateRoom(Long id, UpdateRoomRequest request);
 }

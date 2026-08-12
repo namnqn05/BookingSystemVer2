@@ -38,7 +38,7 @@ CREATE TABLE room (
     name varchar(100) NOT NULL,
     capacity integer NOT NULL CHECK (capacity >= 1),
     is_active boolean NOT NULL,
-    locked_department_id bigint,
+    locked_department_id bigint NOT NULL,
     price_per_hour decimal(19,2) NOT NULL CHECK (price_per_hour >= 0),
     CONSTRAINT fk_room_locked_department FOREIGN KEY (locked_department_id) REFERENCES department(id)
 );

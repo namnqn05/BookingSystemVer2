@@ -47,11 +47,13 @@ class AdminRevenueServiceImplTest {
         room1 = new Room();
         room1.setId(1L);
         room1.setName("Alpha Room");
+        room1.setLockedDepartmentId(1L);
         room1.setPricePerHour(new BigDecimal("100.00"));
 
         room2 = new Room();
         room2.setId(2L);
         room2.setName("Beta Room");
+        room2.setLockedDepartmentId(1L);
         room2.setPricePerHour(new BigDecimal("200.00"));
     }
 

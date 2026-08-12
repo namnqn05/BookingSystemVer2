@@ -22,8 +22,11 @@ public class RoomController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<RoomResponse>> getAllRooms(Pageable pageable) {
-        return ResponseEntity.ok(roomService.getAllRooms(pageable));
+    public ResponseEntity<Page<RoomResponse>> getAllRooms(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Boolean active,
+            Pageable pageable) {
+        return ResponseEntity.ok(roomService.getAllRooms(q, active, pageable));
     }
 
     @PostMapping

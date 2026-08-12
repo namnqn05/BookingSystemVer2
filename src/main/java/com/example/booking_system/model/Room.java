@@ -23,7 +23,7 @@ public class Room {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
 
-    @Column(name = "locked_department_id")
+    @Column(name = "locked_department_id", nullable = false)
     private Long lockedDepartmentId;
 
     @Column(name = "price_per_hour", nullable = false, precision = 19, scale = 2)

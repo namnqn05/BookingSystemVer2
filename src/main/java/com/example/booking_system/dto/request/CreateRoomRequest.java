@@ -18,6 +18,9 @@ public class CreateRoomRequest {
 
     private BigDecimal pricePerHour;
 
+    @NotNull(message = "Locked department ID is required")
+    private Long lockedDepartmentId;
+
     public CreateRoomRequest() {
     }
 
@@ -32,6 +35,14 @@ public class CreateRoomRequest {
         this.capacity = capacity;
         this.isActive = isActive != null ? isActive : true;
         this.pricePerHour = pricePerHour;
+    }
+
+    public CreateRoomRequest(String name, Integer capacity, Boolean isActive, BigDecimal pricePerHour, Long lockedDepartmentId) {
+        this.name = name;
+        this.capacity = capacity;
+        this.isActive = isActive != null ? isActive : true;
+        this.pricePerHour = pricePerHour;
+        this.lockedDepartmentId = lockedDepartmentId;
     }
 
     public String getName() {
@@ -64,5 +75,13 @@ public class CreateRoomRequest {
 
     public void setPricePerHour(BigDecimal pricePerHour) {
         this.pricePerHour = pricePerHour;
+    }
+
+    public Long getLockedDepartmentId() {
+        return lockedDepartmentId;
+    }
+
+    public void setLockedDepartmentId(Long lockedDepartmentId) {
+        this.lockedDepartmentId = lockedDepartmentId;
     }
 }

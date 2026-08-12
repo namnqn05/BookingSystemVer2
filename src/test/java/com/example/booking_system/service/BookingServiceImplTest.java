@@ -64,6 +64,7 @@ class BookingServiceImplTest {
         room.setName("Conference Room A");
         room.setCapacity(10);
         room.setIsActive(true);
+        room.setLockedDepartmentId(1L);
         room.setPricePerHour(new BigDecimal("100.00"));
     }
 
